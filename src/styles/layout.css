@@ -1,0 +1,26 @@
+/* 应用壳：侧边栏 + 主区的横向布局 */
+@layer components {
+  .app-shell {
+    @apply flex h-dvh overflow-hidden bg-background text-foreground;
+  }
+
+  /* 页头顶栏：固定高度，底部描边 */
+  .app-header {
+    @apply flex h-12 shrink-0 items-center border-b px-4;
+  }
+
+  /* 页头标题：超长省略 */
+  .app-header-title {
+    @apply truncate text-sm font-medium;
+  }
+
+  /* 主内容区：占满剩余空间，独立滚动 */
+  .app-content {
+    @apply min-h-0 flex-1 overflow-auto p-4 md:p-6;
+  }
+
+  /* 整页居中容器（占位页使用） */
+  .page-center {
+    @apply flex h-full items-center justify-center;
+  }
+}

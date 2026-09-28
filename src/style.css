@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn-vue/tailwind.css";
+
+/* 设计令牌：暗色变体、主题变量映射、明暗调色板 */
+@import "./styles/tokens.css";
+
+/* 元素基础样式与全局效果 */
+@import "./styles/base.css";
+
+/* 按领域拆分的组件类 */
+@import "./styles/layout.css";
+@import "./styles/sidebar.css";
+@import "./styles/settings.css";
+@import "./styles/form.css";
+@import "./styles/overlay.css";

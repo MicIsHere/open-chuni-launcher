@@ -1,0 +1,36 @@
+/* 设置页容器：限宽居中，分类之间大间距 */
+@layer components {
+  .settings-page {
+    @apply mx-auto flex w-full max-w-3xl flex-col gap-8;
+  }
+
+  /* 设置分类：标题与卡片纵向排列 */
+  .settings-section {
+    @apply flex flex-col gap-3;
+  }
+
+  /* 分类小标题 */
+  .settings-section-title {
+    @apply px-1 text-sm font-medium text-muted-foreground;
+  }
+
+  /* 设置卡片：窄屏纵向堆叠，宽屏左右分布 */
+  .setting-card {
+    @apply flex flex-col gap-4 rounded-xl border bg-card p-4 text-card-foreground sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  /* 卡片图标底座 */
+  .setting-card-icon {
+    @apply flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground;
+  }
+
+  /* 卡片标题 */
+  .setting-card-title {
+    @apply text-sm font-medium leading-tight;
+  }
+
+  /* 卡片描述小字 */
+  .setting-card-description {
+    @apply mt-1 text-xs leading-snug text-muted-foreground;
+  }
+}

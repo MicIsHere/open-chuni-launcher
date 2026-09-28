@@ -1,0 +1,42 @@
+# Open Chunithm Launcher — English language pack
+language.name=English
+
+# Navigation
+nav.home=Home
+nav.library=Library
+nav.settings=Settings
+
+# Sidebar
+sidebar.navLabel=Primary navigation
+sidebar.collapse=Collapse
+sidebar.expand=Expand sidebar
+
+# Themes
+theme.light=Light
+theme.dark=Dark
+
+# Settings — categories
+settings.appearance.title=Appearance
+settings.game.title=Game
+
+# Settings — appearance
+settings.theme.title=Theme
+settings.theme.description=Choose the launcher color scheme
+settings.language.title=Language
+settings.language.description=Language used across the interface
+
+# Settings — game
+settings.gamePath.title=Game path
+settings.gamePath.description=Folder containing the game executable
+settings.gamePath.browse=Browse...
+settings.gamePath.placeholder=No folder selected
+settings.launchArgs.title=Launch arguments
+settings.launchArgs.description=Extra command-line arguments passed to the game
+settings.launchArgs.placeholder=e.g. -windowed
+settings.resolution.title=Render resolution
+settings.resolution.description=Resolution used for the game window
+settings.launchTimeout.title=Launch timeout
+settings.launchTimeout.description=Maximum time to wait for the game window (seconds)
+
+# Other pages
+library.empty=Your library is empty

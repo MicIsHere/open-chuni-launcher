@@ -1,0 +1,10 @@
+# 本目录若独立成仓库时的兜底忽略；常规情况下由根目录 .gitignore 统一管理
+
+# Cargo 构建产物（含 release/bundle 打包输出）
+/target/
+
+# Tauri 生成文件：权限 schema 与移动端工程（gen/android、gen/ios）
+/gen/
+
+# Rust 崩溃备份
+*.rs.bk

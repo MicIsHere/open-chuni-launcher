@@ -1,0 +1,31 @@
+/* 下拉弹层：与触发器同宽，带进出动画与方向滑入 */
+@layer components {
+  .select-content {
+    @apply bg-popover text-popover-foreground relative z-50 rounded-lg shadow-md ring-1 ring-foreground/10 duration-100 overflow-hidden w-(--reka-select-trigger-width) origin-(--reka-select-content-transform-origin) data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2;
+  }
+
+  /* 弹层内滚动视口：限高，超出滚动 */
+  .select-viewport {
+    @apply max-h-(--reka-select-content-available-height) overflow-x-hidden overflow-y-auto p-1;
+  }
+
+  /* 下拉选项：聚焦高亮，禁用降透明度，右侧预留选中指示器位置 */
+  .select-item {
+    @apply data-highlighted:bg-accent data-highlighted:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-md py-1 pr-8 pl-2 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:shrink-0;
+  }
+
+  /* 选项文字：不换行，图标与文字留间距 */
+  .select-item-text {
+    @apply flex shrink-0 items-center gap-2 whitespace-nowrap;
+  }
+
+  /* 选中指示器（勾选图标）：定位在选项右侧 */
+  .select-item-indicator {
+    @apply pointer-events-none absolute right-2 flex size-4 items-center justify-center;
+  }
+
+  /* 工具提示气泡：深底浅字，展开时淡入缩放 */
+  .tooltip-content {
+    @apply inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 bg-foreground text-background w-fit max-w-xs origin-(--reka-tooltip-content-transform-origin) data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2;
+  }
+}
