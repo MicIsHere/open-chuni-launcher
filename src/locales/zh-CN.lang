@@ -3,8 +3,11 @@ language.name=简体中文
 
 # 导航
 nav.home=首页
-nav.library=游戏库
+nav.logs=日志
 nav.settings=设置
+
+# 日志页
+logs.empty=暂无日志
 
 # 侧边栏
 sidebar.navLabel=主导航
@@ -30,23 +33,18 @@ settings.gamePath.title=游戏路径
 settings.gamePath.description=游戏主程序所在目录
 settings.gamePath.browse=浏览...
 settings.gamePath.placeholder=未选择文件夹
-settings.launchArgs.title=启动参数
-settings.launchArgs.description=启动游戏时附加的命令行参数
-settings.launchArgs.placeholder=例如：-windowed
-settings.resolution.title=渲染分辨率
-settings.resolution.description=游戏窗口使用的渲染分辨率
-settings.launchTimeout.title=启动超时
-settings.launchTimeout.description=等待游戏窗口出现的最长时间（秒）
 settings.gameDlls.title=注入 DLL
 settings.gameDlls.description=按顺序注入到游戏进程的 DLL 文件
 settings.gameDlls.placeholder=添加 DLL 文件名
 settings.gameDlls.add=添加
 settings.gameDlls.remove=移除
+settings.launchArgs.title=启动参数
+settings.launchArgs.description=启动游戏时附加的命令行参数
+settings.launchArgs.placeholder=例如：-windowed
+settings.launchTimeout.title=启动超时
+settings.launchTimeout.description=等待游戏窗口出现的最长时间（秒）
 
 # 首页
 home.launch=启动游戏
 home.stop=结束游戏
 home.needGamePath=尚未配置游戏目录，请先在「设置 → 游戏」中填写
-
-# 其他页面
-library.empty=游戏库暂时是空的

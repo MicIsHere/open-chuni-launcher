@@ -1,45 +1,39 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from "vue";
-import { Play, Square } from "@lucide/vue";
+import { Disc3, Play, Square } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import { useLaunch } from "@/composables/useLaunch";
 import { useI18n } from "@/i18n";
 
 const { t } = useI18n();
-const { logs, running, launch, stop } = useLaunch();
-
-const logPanel = ref<HTMLElement | null>(null);
-
-// 新日志到达时自动滚动到底部
-watch(
-  () => logs.value.length,
-  async () => {
-    await nextTick();
-    if (logPanel.value) {
-      logPanel.value.scrollTop = logPanel.value.scrollHeight;
-    }
-  },
-);
+const { running, launch, stop } = useLaunch();
 </script>
 
 <template>
-  <div class="flex h-full flex-col gap-4">
-    <div class="flex items-center gap-2">
-      <Button :disabled="running" @click="launch">
-        <Play class="size-4" aria-hidden="true" />
-        {{ t("home.launch") }}
-      </Button>
-      <Button variant="outline" :disabled="!running" @click="stop">
-        <Square class="size-4" aria-hidden="true" />
-        {{ t("home.stop") }}
-      </Button>
+  <div class="relative h-full">
+    <div class="page-center select-none flex-col gap-3">
+      <Disc3 class="size-16 text-muted-foreground/40" aria-hidden="true" />
+      <h2 class="text-2xl font-semibold tracking-tight">Open Chunithm Launcher</h2>
     </div>
 
-    <div
-      ref="logPanel"
-      class="min-h-0 flex-1 overflow-auto rounded-lg border bg-card p-3 font-mono text-xs leading-relaxed text-muted-foreground"
-    >
-      <p v-for="(line, index) in logs" :key="index">{{ line }}</p>
+    <!-- 启动控制：固定在右下角 -->
+    <div class="absolute bottom-8 right-8 flex items-center gap-3">
+      <Button
+        v-if="running"
+        variant="outline"
+        class="h-12! rounded-2xl! px-6! text-base!"
+        @click="stop"
+      >
+        <Square class="size-5" aria-hidden="true" />
+        {{ t("home.stop") }}
+      </Button>
+      <Button
+        class="h-14! gap-3! rounded-2xl! px-10! text-lg! font-semibold shadow-lg shadow-primary/25"
+        :disabled="running"
+        @click="launch"
+      >
+        <Play class="size-6" aria-hidden="true" />
+        {{ t("home.launch") }}
+      </Button>
     </div>
   </div>
 </template>

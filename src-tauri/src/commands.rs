@@ -64,10 +64,16 @@ fn run_session(app: &AppHandle, game_dir: &str, dlls: Vec<String>) -> Result<Lau
     launcher::kill_by_image(launcher::AMDAEMON_EXE);
 
     log(app, "正在启动 amdaemon…");
-    launcher::spawn_amdaemon(&game_dir)?;
+    let app_amdaemon = app.clone();
+    launcher::spawn_amdaemon(&game_dir, move |line| {
+        let _ = app_amdaemon.emit("launch://log", line.to_string());
+    })?;
 
     log(app, "正在启动游戏…");
-    let (mut game, missing_dlls) = launcher::spawn_game(&game_dir, dlls)?;
+    let app_game = app.clone();
+    let (mut game, missing_dlls) = launcher::spawn_game(&game_dir, dlls, move |line| {
+        let _ = app_game.emit("launch://log", line.to_string());
+    })?;
 
     log(app, "游戏已启动，等待退出…");
     let _ = app.emit("launch://state", true);
@@ -76,7 +82,6 @@ fn run_session(app: &AppHandle, game_dir: &str, dlls: Vec<String>) -> Result<Lau
     log(app, "正在清理 amdaemon…");
     launcher::kill_by_image(launcher::AMDAEMON_EXE);
 
-    // 会话收尾信息直接由后端写入日志流，前端切换页面也不会丢失
     if !missing_dlls.is_empty() {
         log(
             app,

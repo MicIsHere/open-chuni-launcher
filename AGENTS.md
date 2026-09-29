@@ -31,7 +31,7 @@ Rust: snake_case throughout; the lib name keeps the `_lib` suffix (Windows bin/l
 src/
   components/
     layout/   AppSidebar (nav shell)
-    pages/    HomePage, SettingsPage  (matched by id in lib/navigation.ts)
+    pages/    HomePage, LogsPage, SettingsPage  (matched by id in lib/navigation.ts)
     settings/ SettingCard + controls/ (per-control-type wrappers)
     ui/       shadcn-vue components (button, input, number-field, select, tooltip)
   composables/  useTheme, useSettings

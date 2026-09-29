@@ -3,8 +3,11 @@ language.name=English
 
 # Navigation
 nav.home=Home
-nav.library=Library
+nav.logs=Logs
 nav.settings=Settings
+
+# Logs page
+logs.empty=No logs yet
 
 # Sidebar
 sidebar.navLabel=Primary navigation
@@ -33,8 +36,6 @@ settings.gamePath.placeholder=No folder selected
 settings.launchArgs.title=Launch arguments
 settings.launchArgs.description=Extra command-line arguments passed to the game
 settings.launchArgs.placeholder=e.g. -windowed
-settings.resolution.title=Render resolution
-settings.resolution.description=Resolution used for the game window
 settings.launchTimeout.title=Launch timeout
 settings.launchTimeout.description=Maximum time to wait for the game window (seconds)
 settings.gameDlls.title=Inject DLLs
@@ -47,6 +48,3 @@ settings.gameDlls.remove=Remove
 home.launch=Launch Game
 home.stop=Stop Game
 home.needGamePath=Game directory is not configured. Set it in Settings → Game first.
-
-# Other pages
-library.empty=Your library is empty
