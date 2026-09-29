@@ -31,7 +31,7 @@ Rust: snake_case throughout; the lib name keeps the `_lib` suffix (Windows bin/l
 src/
   components/
     layout/   AppSidebar (nav shell)
-    pages/    HomePage, LogsPage, SettingsPage  (matched by id in lib/navigation.ts)
+    pages/    HomePage, PluginsPage, LogsPage, SettingsPage  (matched by id in lib/navigation.ts)
     settings/ SettingCard + controls/ (per-control-type wrappers)
     ui/       shadcn-vue components (button, input, number-field, select, tooltip)
   composables/  useTheme, useSettings
@@ -42,9 +42,11 @@ src/
 src-tauri/
   src/
     lib.rs      Builder、插件注册、命令注册
-    commands.rs 前端命令（launch_game 阻塞至游戏退出、stop_game）+ 运行状态
+    commands.rs 前端命令（launch_game 阻塞至游戏退出、stop_game、list_plugin_dlls）+ 运行状态
     launcher.rs 启动流程编排（清理 → amdaemon → 游戏 → 清理，对应原 bat 时序）
-    inject.rs   注入解耦：把「注入器 + 目标 + DLL 清单」组装成命令行
+    inject.rs   注入解耦：把「注入器 + 目标 + DLL 清单」组装成命令行（支持绝对路径）
+    plugins.rs  内置插件：扫描打包的插件目录、解析同名 JSON 清单、图标转 data URL
+  plugins/      内置插件目录（X.dll + 同名 X.json 清单，经 bundle.resources 打包）
   （capabilities/ 权限、icons/ 图标、tauri.conf.json 配置）
 ```
 
@@ -105,4 +107,5 @@ Persisted via `useSettings()` (one JSON document in localStorage, merged over de
 - Every plugin needs three touchpoints: npm package, `src-tauri/Cargo.toml`, `.plugin(...)` in `lib.rs`, plus a permission in `src-tauri/capabilities/default.json` (see `tauri-plugin-dialog` for the path picker).
 - Browser-only previews (vite preview) have no Tauri runtime — guard native APIs (e.g. `SettingPath` disables browsing when `"__TAURI_INTERNALS__" not in window`).
 - Long-running commands (like `launch_game`, which blocks until the game exits) must be `async` + `spawn_blocking` — a sync command runs on the main thread and freezes the window. Progress goes through `launch://log` events, session state through `launch://state` + the `is_running` command; the frontend keeps both in the `useLaunch()` store (logs persisted to localStorage, capped at 500 lines).
+- 内置插件：名称与描述由 `plugins/` 下的同名 JSON 清单提供，均为只读（描述不可更改）；清单字段支持字符串或 `{locale: text}` 多语言映射，前端经 `resolveLocalizedText()` 随当前语言响应式解析；启用的内置插件在启动时由后端从资源目录复制到游戏目录再注入，DLL 清单支持绝对路径。
 - Icons are generated from `public/favicon.svg` via `npx tauri icon public/favicon.svg`; `src-tauri/gen/` is generated output.

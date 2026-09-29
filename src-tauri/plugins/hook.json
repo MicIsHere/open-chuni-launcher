@@ -1,0 +1,7 @@
+{
+  "name": { "zh-CN": "巫女插件", "en-US": "Miko Plugin" },
+  "description": {
+    "zh-CN": "用于自定义游戏部分内容，与多种实用工具.",
+    "en-US": "Customizes parts of the game with various utilities."
+  }
+}

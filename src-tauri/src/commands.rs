@@ -1,10 +1,10 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, Manager, State};
 
-use crate::launcher;
+use crate::{launcher, plugins};
 
 #[derive(Default)]
 pub struct LauncherState(pub Mutex<bool>);
@@ -14,11 +14,21 @@ pub struct LaunchReport {
     pub missing_dlls: Vec<String>,
 }
 
+/// 随启动器打包的内置插件：启动时由启动器复制到游戏目录
+#[derive(Deserialize)]
+pub struct BuiltinPluginSource {
+    /// 注入时使用的 DLL 文件名
+    pub dll: String,
+    /// 资源目录中的 DLL 绝对路径
+    pub source: String,
+}
+
 #[tauri::command]
 pub async fn launch_game(
     app: AppHandle,
     game_dir: String,
     dlls: Vec<String>,
+    builtin_plugins: Option<Vec<BuiltinPluginSource>>,
 ) -> Result<LaunchReport, String> {
     {
         let state = app.state::<LauncherState>();
@@ -31,7 +41,7 @@ pub async fn launch_game(
 
     let session_app = app.clone();
     let result = tauri::async_runtime::spawn_blocking(move || {
-        run_session(&session_app, &game_dir, dlls)
+        run_session(&session_app, &game_dir, dlls, builtin_plugins)
     })
     .await
     .map_err(|error| format!("内部任务异常：{error}"))?;
@@ -54,11 +64,26 @@ pub fn stop_game() -> Result<(), String> {
     Ok(())
 }
 
+/// 列出插件目录中的 DLL 插件（含同名 JSON 清单信息）。
+/// `directory` 缺省时扫描随启动器打包的内置插件目录。
 #[tauri::command]
-pub async fn list_plugin_dlls(directory: String) -> Result<Vec<String>, String> {
-    tauri::async_runtime::spawn_blocking(move || scan_plugin_dlls(Path::new(&directory)))
-        .await
-        .map_err(|error| format!("内部任务异常：{error}"))?
+pub async fn list_plugin_dlls(
+    app: AppHandle,
+    directory: Option<String>,
+) -> Result<Vec<plugins::PluginInfo>, String> {
+    let directory = match directory {
+        Some(directory) => PathBuf::from(directory),
+        None => plugins::plugins_dir(&app).ok_or_else(|| "未找到内置插件目录".to_string())?,
+    };
+    tauri::async_runtime::spawn_blocking(move || {
+        let paths = scan_plugin_dlls(&directory)?;
+        Ok(paths
+            .iter()
+            .filter_map(|path| plugins::read_plugin_info(&directory, Path::new(path)))
+            .collect())
+    })
+    .await
+    .map_err(|error| format!("内部任务异常：{error}"))?
 }
 
 fn scan_plugin_dlls(directory: &Path) -> Result<Vec<String>, String> {
@@ -81,10 +106,28 @@ fn scan_plugin_dlls(directory: &Path) -> Result<Vec<String>, String> {
     Ok(dlls)
 }
 
-fn run_session(app: &AppHandle, game_dir: &str, dlls: Vec<String>) -> Result<LaunchReport, String> {
+fn run_session(
+    app: &AppHandle,
+    game_dir: &str,
+    dlls: Vec<String>,
+    builtin_plugins: Option<Vec<BuiltinPluginSource>>,
+) -> Result<LaunchReport, String> {
     let game_dir = PathBuf::from(game_dir);
     if !game_dir.is_dir() {
         return Err(format!("游戏目录不存在：{}", game_dir.display()));
+    }
+
+    // 启用的内置插件：从资源目录复制到游戏目录（对应 bat 的 if exist duolinguo.dll 前置条件）
+    if let Some(builtin_plugins) = builtin_plugins {
+        for plugin in builtin_plugins {
+            let target = game_dir.join(&plugin.dll);
+            let source = PathBuf::from(&plugin.source);
+            if source != target {
+                std::fs::copy(&source, &target).map_err(|error| {
+                    format!("无法安装内置插件 {}：{error}", plugin.dll)
+                })?;
+            }
+        }
     }
 
     log(app, "正在清理残留的 amdaemon 进程…");
