@@ -12,5 +12,6 @@
 @import "./styles/layout.css";
 @import "./styles/sidebar.css";
 @import "./styles/settings.css";
+@import "./styles/plugins.css";
 @import "./styles/form.css";
 @import "./styles/overlay.css";

@@ -28,4 +28,86 @@
   .tooltip-content {
     @apply inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs has-data-[slot=kbd]:pr-1.5 **:data-[slot=kbd]:relative **:data-[slot=kbd]:isolate **:data-[slot=kbd]:z-50 bg-foreground text-background w-fit max-w-xs origin-(--reka-tooltip-content-transform-origin) data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2;
   }
+
+  /* 全局通知：预留动画与阴影空间，超长堆叠可滚动但不显示滚动条 */
+  .notification-viewport {
+    @apply pointer-events-none fixed top-0 right-0 z-[100] m-0 flex max-h-dvh w-98 max-w-full flex-col gap-3 overflow-x-hidden overflow-y-auto p-4 outline-none;
+    scrollbar-width: none;
+  }
+  .notification-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 通知卡片：统一淡入滑入与淡出滑出，避免突然移除 */
+  .notification-card {
+    @apply pointer-events-auto relative flex shrink-0 items-start gap-3 rounded-lg border border-l-4 bg-popover p-3 text-popover-foreground shadow-lg outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-right-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-right-2 duration-200 ease-out;
+  }
+
+  /* 通知图标底座：保持尺寸稳定 */
+  .notification-icon {
+    @apply flex size-8 shrink-0 items-center justify-center rounded-md;
+  }
+
+  /* 通知文字区：允许长错误信息换行 */
+  .notification-content {
+    @apply min-w-0 flex-1;
+  }
+
+  /* 通知标题：紧凑字号，不挤压关闭按钮 */
+  .notification-title {
+    @apply text-sm font-medium break-words;
+  }
+
+  /* 通知详情：保留换行，长内容可滚动但不显示滚动条 */
+  .notification-message {
+    @apply mt-1 max-h-40 overflow-x-hidden overflow-y-auto text-xs leading-relaxed whitespace-pre-wrap text-muted-foreground [overflow-wrap:anywhere];
+    scrollbar-width: none;
+  }
+  .notification-message::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 成功通知：绿色侧边线、图标与标题 */
+  .notification-card[data-type="success"] {
+    @apply border-l-notification-success;
+  }
+  .notification-card[data-type="success"] .notification-icon {
+    @apply bg-notification-success/10 text-notification-success;
+  }
+  .notification-card[data-type="success"] .notification-title {
+    @apply text-notification-success;
+  }
+
+  /* 信息通知：蓝色侧边线、图标与标题 */
+  .notification-card[data-type="info"] {
+    @apply border-l-notification-info;
+  }
+  .notification-card[data-type="info"] .notification-icon {
+    @apply bg-notification-info/10 text-notification-info;
+  }
+  .notification-card[data-type="info"] .notification-title {
+    @apply text-notification-info;
+  }
+
+  /* 警告通知：琥珀色侧边线、图标与标题 */
+  .notification-card[data-type="warning"] {
+    @apply border-l-notification-warning;
+  }
+  .notification-card[data-type="warning"] .notification-icon {
+    @apply bg-notification-warning/10 text-notification-warning;
+  }
+  .notification-card[data-type="warning"] .notification-title {
+    @apply text-notification-warning;
+  }
+
+  /* 错误通知：红色侧边线、图标与标题 */
+  .notification-card[data-type="error"] {
+    @apply border-l-notification-error;
+  }
+  .notification-card[data-type="error"] .notification-icon {
+    @apply bg-notification-error/10 text-notification-error;
+  }
+  .notification-card[data-type="error"] .notification-title {
+    @apply text-notification-error;
+  }
 }

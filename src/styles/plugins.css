@@ -1,0 +1,115 @@
+/* 插件页：限宽居中，工具栏与插件分组纵向排列 */
+@layer components {
+  .plugins-page {
+    @apply mx-auto flex w-full max-w-3xl flex-col gap-6;
+  }
+
+  /* 工具栏：窄屏换行，统计保持自然宽度 */
+  .plugins-toolbar {
+    @apply flex flex-wrap items-center justify-between gap-3;
+  }
+
+  /* 命令按钮组：空间不足时自动换行 */
+  .plugins-toolbar-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  /* 插件数量：低对比小字 */
+  .plugins-count {
+    @apply text-xs font-normal text-muted-foreground;
+  }
+
+  /* 添加表单：以分隔线连接页面，不使用嵌套卡片 */
+  .plugins-add-form {
+    @apply flex flex-col gap-3 border-b pb-5;
+  }
+
+  /* 添加字段：宽屏双列，窄屏纵向堆叠 */
+  .plugins-add-fields {
+    @apply grid min-w-0 gap-3 sm:grid-cols-2;
+  }
+
+  /* 插件分组：标题和独立插件卡片纵向排列 */
+  .plugins-section {
+    @apply flex min-w-0 flex-col gap-3;
+  }
+
+  /* 分组标题：紧凑字号与数量分离 */
+  .plugins-section-title {
+    @apply flex items-center gap-2 text-sm font-medium;
+  }
+
+  /* 插件卡片：紧凑描边，关闭后保留所有编辑操作 */
+  .plugin-card {
+    @apply flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-4 text-card-foreground;
+  }
+
+  /* 插件头部：名称与操作在窄屏分行 */
+  .plugin-card-header {
+    @apply flex min-w-0 flex-wrap items-start gap-3;
+  }
+
+  /* 插件图标：关闭时降低对比，不影响文本可读性 */
+  .plugin-card-icon {
+    @apply mt-0.5 size-5 shrink-0 text-foreground;
+  }
+  .plugin-card[data-enabled="false"] .plugin-card-icon {
+    @apply text-muted-foreground;
+  }
+
+  /* 插件名称区域：允许长文件名自然换行 */
+  .plugin-card-heading {
+    @apply min-w-0 flex-1 basis-28;
+  }
+
+  /* 固定名称：长词自动断行 */
+  .plugin-card-name {
+    @apply text-sm font-medium break-all;
+  }
+
+  /* DLL 路径：等宽小字，避免长路径撑开页面 */
+  .plugin-card-dll {
+    @apply mt-1 block text-xs leading-relaxed text-muted-foreground break-all;
+  }
+
+  /* 插件操作：保持稳定高度并允许整组换行 */
+  .plugin-card-actions {
+    @apply ml-auto flex h-8 shrink-0 items-center gap-2;
+  }
+
+  /* 内置标识：提供键盘可聚焦的提示入口 */
+  .plugin-builtin-mark {
+    @apply flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring;
+  }
+
+  /* 启用控件：统一点击区域，状态文本不挤压名称 */
+  .plugin-enabled-control {
+    @apply flex h-8 min-w-20 cursor-pointer items-center gap-2 text-xs;
+  }
+
+  /* 原生开关：保留键盘行为与明显的焦点环 */
+  .plugin-enabled-checkbox {
+    @apply size-4 shrink-0 cursor-pointer accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+  }
+
+  /* 字段容器：标签与输入纵向排列 */
+  .plugin-field {
+    @apply flex min-w-0 flex-col gap-1.5;
+  }
+
+  /* 字段标签：使用次要文本色 */
+  .plugin-field-label {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* 描述输入：可纵向调整，焦点效果沿用表单令牌 */
+  .plugin-description-field {
+    @apply min-h-16 w-full min-w-0 resize-y rounded-lg border border-input bg-background px-2.5 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+
+  /* 空列表：轻量分隔，不增加占位卡片 */
+  .plugins-empty {
+    @apply border-t py-5 text-sm text-muted-foreground;
+  }
+
+}
