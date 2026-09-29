@@ -37,6 +37,16 @@ settings.resolution.title=Render resolution
 settings.resolution.description=Resolution used for the game window
 settings.launchTimeout.title=Launch timeout
 settings.launchTimeout.description=Maximum time to wait for the game window (seconds)
+settings.gameDlls.title=Inject DLLs
+settings.gameDlls.description=DLL files injected into the game process, in order
+settings.gameDlls.placeholder=Add a DLL file name
+settings.gameDlls.add=Add
+settings.gameDlls.remove=Remove
+
+# Home
+home.launch=Launch Game
+home.stop=Stop Game
+home.needGamePath=Game directory is not configured. Set it in Settings → Game first.
 
 # Other pages
 library.empty=Your library is empty

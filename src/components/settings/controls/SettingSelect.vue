@@ -19,11 +19,6 @@ const model = defineModel<string>({ required: true });
 
 const props = defineProps<{ options: SelectOption[] }>();
 
-/**
- * Render the trigger text from `options` instead of relying on reka-ui's
- * cached item text, so label changes (e.g. switching language) apply to the
- * closed trigger immediately.
- */
 const selectedLabel = computed(
   () => props.options.find((option) => option.value === model.value)?.label ?? "",
 );

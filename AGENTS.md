@@ -39,7 +39,13 @@ src/
   lib/          themes.ts, navigation.ts, utils.ts (cn)
   locales/      *.lang files (one per locale)
   styles/       tokens / base / layout / sidebar / settings / form / overlay
-src-tauri/      Rust side (lib.rs registers plugins; capabilities in capabilities/)
+src-tauri/
+  src/
+    lib.rs      Builder、插件注册、命令注册
+    commands.rs 前端命令（launch_game 阻塞至游戏退出、stop_game）+ 运行状态
+    launcher.rs 启动流程编排（清理 → amdaemon → 游戏 → 清理，对应原 bat 时序）
+    inject.rs   注入解耦：把「注入器 + 目标 + DLL 清单」组装成命令行
+  （capabilities/ 权限、icons/ 图标、tauri.conf.json 配置）
 ```
 
 ## CSS architecture (Tailwind CSS v4)
@@ -98,4 +104,5 @@ Persisted via `useSettings()` (one JSON document in localStorage, merged over de
 
 - Every plugin needs three touchpoints: npm package, `src-tauri/Cargo.toml`, `.plugin(...)` in `lib.rs`, plus a permission in `src-tauri/capabilities/default.json` (see `tauri-plugin-dialog` for the path picker).
 - Browser-only previews (vite preview) have no Tauri runtime — guard native APIs (e.g. `SettingPath` disables browsing when `"__TAURI_INTERNALS__" not in window`).
+- Long-running commands (like `launch_game`, which blocks until the game exits) must be `async` + `spawn_blocking` — a sync command runs on the main thread and freezes the window. Progress goes through `launch://log` events, session state through `launch://state` + the `is_running` command; the frontend keeps both in the `useLaunch()` store (logs persisted to localStorage, capped at 500 lines).
 - Icons are generated from `public/favicon.svg` via `npx tauri icon public/favicon.svg`; `src-tauri/gen/` is generated output.

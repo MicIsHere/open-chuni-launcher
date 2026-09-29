@@ -8,7 +8,6 @@ const model = defineModel<string>({ required: true });
 
 defineProps<{ placeholder?: string; browseLabel: string }>();
 
-/** Native folder dialogs only exist inside the Tauri runtime. */
 const isTauri = "__TAURI_INTERNALS__" in window;
 
 async function browse() {

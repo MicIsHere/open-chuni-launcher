@@ -15,11 +15,6 @@ const { t } = useI18n();
 
 const active = defineModel<string>({ required: true });
 
-/**
- * 侧边栏按钮的共享样式。必须留在模板中（不能放进 styles/）：它要覆盖
- * buttonVariants 自带的工具类，只有 cn()/tw-merge 能做到——级联层级中
- * components 层恒输给 utilities 层。
- */
 const sidebarItemClass =
   "w-full justify-start gap-2.5 px-2 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground";
 
@@ -30,7 +25,6 @@ const manualCollapsed = ref(localStorage.getItem(COLLAPSE_KEY) === "1");
 const mediaQuery = window.matchMedia(NARROW_QUERY);
 const narrow = ref(mediaQuery.matches);
 
-/** Icon-only rail when manually collapsed or when the window is too narrow. */
 const collapsed = computed(() => manualCollapsed.value || narrow.value);
 
 function toggleCollapsed() {

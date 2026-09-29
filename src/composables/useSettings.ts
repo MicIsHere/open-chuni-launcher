@@ -4,12 +4,14 @@ export interface AppSettings {
   gamePath: string;
   launchArgs: string;
   launchTimeoutSeconds: number;
+  gameDlls: string[];
 }
 
 const DEFAULTS: AppSettings = {
   gamePath: "",
   launchArgs: "",
   launchTimeoutSeconds: 30,
+  gameDlls: ["chusanhook.dll", "duolinguo.dll", "hook.dll"],
 };
 
 const STORAGE_KEY = "settings";
