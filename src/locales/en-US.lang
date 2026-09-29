@@ -3,6 +3,7 @@ language.name=English
 
 # Navigation
 nav.home=Home
+nav.plugins=Plugins
 nav.logs=Logs
 nav.settings=Settings
 
@@ -38,13 +39,60 @@ settings.launchArgs.description=Extra command-line arguments passed to the game
 settings.launchArgs.placeholder=e.g. -windowed
 settings.launchTimeout.title=Launch timeout
 settings.launchTimeout.description=Maximum time to wait for the game window (seconds)
-settings.gameDlls.title=Inject DLLs
-settings.gameDlls.description=DLL files injected into the game process, in order
-settings.gameDlls.placeholder=Add a DLL file name
-settings.gameDlls.add=Add
-settings.gameDlls.remove=Remove
 
 # Home
 home.launch=Launch Game
 home.stop=Stop Game
 home.needGamePath=Game directory is not configured. Set it in Settings → Game first.
+
+# Plugins page
+plugins.duolinguo.name=Duolinguo
+plugins.hook.name=Hook
+plugins.builtin=Built-in plugins
+plugins.custom=Custom plugins
+plugins.add=Add plugin
+plugins.importFiles=Import DLLs
+plugins.importFolder=Import folder
+plugins.dllFiles=DLL files
+plugins.dllPath=DLL file name or path
+plugins.dllPlaceholder=example.dll or full file path
+plugins.description=Description
+plugins.noDescription=No description
+plugins.editDescription=Edit the description of {name}
+plugins.enabled=Enabled
+plugins.disabled=Disabled
+plugins.toggle=Enable {name}
+plugins.enabledCount={count} / {total} enabled
+plugins.remove=Remove {name}
+plugins.cancel=Cancel
+plugins.empty=No custom plugins
+plugins.invalidDll=Enter a valid .dll file name or path
+plugins.coreDll=chusanhook.dll is already loaded as a core DLL
+plugins.duplicate=A plugin with this DLL name already exists
+plugins.emptyFolder=The selected folder contains no DLL files
+plugins.importResult=Added {added} plugins; skipped {skipped} duplicate or core DLLs
+plugins.importError=Import failed: {error}
+
+# Global notifications
+notifications.region=Notifications
+notifications.dismiss=Dismiss notification
+notifications.success=Success
+notifications.info=Information
+notifications.warning=Warning
+notifications.error=Error
+notifications.pluginAdded=Added plugin {name}
+notifications.pluginRemoved=Removed plugin {name}
+notifications.importError=Plugin import failed
+notifications.directoryError=Directory selection failed
+notifications.launchError=Game launch failed
+notifications.stopError=Failed to stop the game
+notifications.launchInitError=Failed to initialize game status
+notifications.gameStarted=Game started
+notifications.gameExited=Game exited
+notifications.missingDlls=Missing DLLs were skipped: {dlls}
+notifications.desktopOnly=Launch the game from the desktop application
+notifications.settingsReset=Invalid settings; using defaults
+notifications.settingsLoadError=Failed to load settings; using defaults
+notifications.settingsSaveError=Failed to save settings
+notifications.logsLoadError=Failed to load logs
+notifications.logsSaveError=Failed to save logs

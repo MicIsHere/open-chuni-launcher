@@ -3,17 +3,26 @@ import { FolderOpen } from "@lucide/vue";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNotifications } from "@/composables/useNotifications";
+import { useI18n } from "@/i18n";
 
 const model = defineModel<string>({ required: true });
 
 defineProps<{ placeholder?: string; browseLabel: string }>();
 
 const isTauri = "__TAURI_INTERNALS__" in window;
+const { notifyError } = useNotifications();
+const { t } = useI18n();
 
 async function browse() {
-  const selected = await open({ directory: true, multiple: false });
-  if (typeof selected === "string") {
-    model.value = selected;
+  if (!isTauri) return;
+  try {
+    const selected = await open({ directory: true, multiple: false });
+    if (typeof selected === "string") {
+      model.value = selected;
+    }
+  } catch (error) {
+    notifyError(error, t("notifications.directoryError"));
   }
 }
 </script>

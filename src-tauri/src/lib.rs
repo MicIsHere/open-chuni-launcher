@@ -10,7 +10,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::launch_game,
             commands::stop_game,
-            commands::is_running
+            commands::is_running,
+            commands::list_plugin_dlls
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

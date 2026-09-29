@@ -2,9 +2,11 @@
 import { computed, ref } from "vue";
 import type { Component } from "vue";
 import AppSidebar from "@/components/layout/AppSidebar.vue";
+import AppNotifications from "@/components/layout/AppNotifications.vue";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useI18n } from "@/i18n";
 import HomePage from "@/pages/HomePage.vue";
+import PluginsPage from "@/pages/PluginsPage.vue";
 import LogsPage from "@/pages/LogsPage.vue";
 import SettingsPage from "@/pages/SettingsPage.vue";
 import { navSections } from "@/lib/navigation";
@@ -13,6 +15,7 @@ const { t } = useI18n();
 
 const pages: Record<string, Component> = {
   home: HomePage,
+  plugins: PluginsPage,
   logs: LogsPage,
   settings: SettingsPage,
 };
@@ -43,5 +46,6 @@ const activePage = computed(() => pages[activeSection.value]);
         </div>
       </main>
     </div>
+    <AppNotifications />
   </TooltipProvider>
 </template>

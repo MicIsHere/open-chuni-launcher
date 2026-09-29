@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use serde::Serialize;
@@ -54,6 +54,33 @@ pub fn stop_game() -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+pub async fn list_plugin_dlls(directory: String) -> Result<Vec<String>, String> {
+    tauri::async_runtime::spawn_blocking(move || scan_plugin_dlls(Path::new(&directory)))
+        .await
+        .map_err(|error| format!("内部任务异常：{error}"))?
+}
+
+fn scan_plugin_dlls(directory: &Path) -> Result<Vec<String>, String> {
+    let entries =
+        std::fs::read_dir(directory).map_err(|error| format!("无法读取插件文件夹：{error}"))?;
+    let mut dlls = Vec::new();
+    for entry in entries {
+        let path = entry
+            .map_err(|error| format!("无法读取插件文件：{error}"))?
+            .path();
+        if path.is_file()
+            && path
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("dll"))
+        {
+            dlls.push(path.to_string_lossy().into_owned());
+        }
+    }
+    dlls.sort_by_cached_key(|path| path.to_lowercase());
+    Ok(dlls)
+}
+
 fn run_session(app: &AppHandle, game_dir: &str, dlls: Vec<String>) -> Result<LaunchReport, String> {
     let game_dir = PathBuf::from(game_dir);
     if !game_dir.is_dir() {
@@ -99,4 +126,33 @@ fn run_session(app: &AppHandle, game_dir: &str, dlls: Vec<String>) -> Result<Lau
 
 fn log(app: &AppHandle, message: &str) {
     let _ = app.emit("launch://log", message.to_string());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::scan_plugin_dlls;
+
+    #[test]
+    fn scan_imports_only_dll_files_in_stable_order() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let directory = std::env::temp_dir().join(format!("launcher-plugins-{unique}"));
+        std::fs::create_dir(&directory).unwrap();
+        for name in ["z_plugin.dll", "a plugin.DLL", "notes.txt"] {
+            std::fs::write(directory.join(name), b"").unwrap();
+        }
+        std::fs::create_dir(directory.join("nested.dll")).unwrap();
+        std::fs::write(directory.join("nested.dll/ignored.dll"), b"").unwrap();
+
+        let result = scan_plugin_dlls(&directory);
+        std::fs::remove_dir_all(&directory).unwrap();
+        assert_eq!(
+            result.unwrap(),
+            ["a plugin.DLL", "z_plugin.dll"]
+                .map(|name| directory.join(name).to_string_lossy().into_owned())
+        );
+        assert!(scan_plugin_dlls(&directory).is_err());
+    }
 }
