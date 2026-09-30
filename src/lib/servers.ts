@@ -56,19 +56,3 @@ export function validateServerConfig(config: ServerConfig): string | undefined {
   }
   return undefined;
 }
-
-export interface ServerPatch {
-  dnsDefault: string;
-  dnsAimeDb?: string;
-  keychip: string;
-}
-
-export function buildServerPatch(config: ServerConfig): ServerPatch {
-  const dns = resolveServerDns(config);
-  const patch: ServerPatch = {
-    dnsDefault: dns.dnsDefault,
-    keychip: config.keychip.trim(),
-  };
-  if (dns.dnsAimeDb) patch.dnsAimeDb = dns.dnsAimeDb;
-  return patch;
-}

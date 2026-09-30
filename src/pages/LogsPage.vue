@@ -8,7 +8,6 @@ const { logs } = useLaunch();
 
 const logPanel = ref<HTMLElement | null>(null);
 
-// 新日志到达时自动滚动到底部
 watch(
   () => logs.value.length,
   async () => {
@@ -29,7 +28,13 @@ watch(
       <p v-if="logs.length === 0" class="py-6 text-center">
         {{ t("logs.empty") }}
       </p>
-      <p v-for="(line, index) in logs" :key="index">{{ line }}</p>
+      <p
+        v-for="(line, index) in logs"
+        :key="index"
+        class="whitespace-pre-wrap wrap-break-word"
+      >
+        {{ line }}
+      </p>
     </div>
   </div>
 </template>

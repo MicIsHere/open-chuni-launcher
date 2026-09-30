@@ -113,7 +113,6 @@ fn spawn_with_output(
 
     let mut child = match command.spawn() {
         Ok(child) => child,
-        // spawn 失败时无输出可转发，错误交由调用方处理
         Err(_) => return,
     };
 

@@ -8,7 +8,10 @@ import { useI18n } from "@/i18n";
 
 const model = defineModel<string>({ required: true });
 
-defineProps<{ placeholder?: string; browseLabel: string }>();
+const props = withDefaults(
+  defineProps<{ placeholder?: string; browseLabel: string; editable?: boolean }>(),
+  { editable: false },
+);
 
 const isTauri = "__TAURI_INTERNALS__" in window;
 const { notifyError } = useNotifications();
@@ -30,9 +33,10 @@ async function browse() {
 <template>
   <div class="flex w-full items-center gap-2 sm:w-auto">
     <Input
-      :model-value="model"
+      v-model="model"
       :placeholder="placeholder"
-      readonly
+      :readonly="!props.editable"
+      :title="model"
       class="w-full sm:w-64"
     />
     <Button

@@ -142,7 +142,6 @@ fn read_locale_overrides(
         else {
             continue;
         };
-        // 语言 ID 形如 zh-CN / en（字母开头，仅含字母、数字与连字符）
         let is_locale_id = suffix.starts_with(|c: char| c.is_ascii_alphabetic())
             && suffix
                 .chars()

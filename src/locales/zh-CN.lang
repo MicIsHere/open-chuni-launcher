@@ -9,16 +9,83 @@ nav.settings=设置
 
 # 配置页
 nav.config=配置
+
+# 配置 — 板块
+config.section.server=服务器
+config.section.display=显示与窗口
+config.section.storage=目录与读卡器
+config.section.keys=按键
+
+# 配置 — 服务器
 config.server.title=游戏服务器
-config.server.description=对应 bin 目录下的 segatools.ini，启动游戏时自动写入
+config.server.description=启动游戏时自动写入 segatools.ini
 config.server.preset=服务器预设
 config.server.custom=自定义
 config.server.dns=DNS 服务器
+config.server.dnsRequired=自定义服务器需要填写 DNS 服务器
 config.server.aimedb=AimeDB 服务器（可选）
 config.server.aimedbHint=大多数服务器不需要配置 AimeDB
 config.keychip.title=机台编号
 config.keychip.placeholder=A60E-01A88888888
 config.keychip.invalid=机台编号未填写或格式不正确，无法启动游戏
+
+# 配置 — 显示模式
+config.display.title=显示模式
+config.display.description=选择 60fps 或 120fps，或自定义各开关
+config.display.fps120=120fps
+config.display.fps60=60fps
+config.display.custom=自定义
+config.display.dipsw1.title=NetInstall 类型
+config.display.dipsw1.description=客户端或服务器
+config.display.dipsw1.client=客户端
+config.display.dipsw1.server=服务器
+config.display.dipsw2.title=显示器类型
+config.display.dipsw2.description=120fps 或 60fps
+config.display.dipsw2.fps120=120fps
+config.display.dipsw2.fps60=60fps
+config.display.dipsw3.title=Aime 读卡器类型
+config.display.dipsw3.description=SP 或 CVT
+config.display.dipsw3.sp=SP
+config.display.dipsw3.cvt=CVT
+
+# 配置 — 窗口模式
+config.window.title=窗口模式
+config.window.description=选择全屏、无边框窗口化或窗口化
+config.window.fullscreen=全屏
+config.window.borderless=无边框窗口化
+config.window.windowed=窗口化
+config.window.custom=自定义
+config.window.windowed.title=强制窗口化
+config.window.windowed.description=全屏或窗口
+config.window.windowed.off=全屏
+config.window.windowed.on=窗口
+config.window.framed.title=窗口边框
+config.window.framed.description=窗口模式下是否添加边框
+config.window.framed.off=无边框
+config.window.framed.on=有边框
+config.window.monitor.title=显示器
+config.window.monitor.description=全屏时使用的显示器，0 = 主显示器
+
+# 配置 — 目录与读卡器
+config.vfs.option.title=Option 目录
+config.vfs.option.description=游戏 Option 目录，包含 Axxx 目录
+config.vfs.amfs.title=AMFS 目录
+config.vfs.amfs.description=游戏 AMFS 目录，包含 ICF1 与 ICF2，不建议修改
+config.vfs.appdata.title=AppData 目录
+config.vfs.appdata.description=可跨游戏共享的空目录，不建议修改
+config.vfs.browse=浏览...
+config.vfs.placeholder=例如：option
+config.aime.title=虚拟读卡器
+config.aime.description=开启后使用虚拟读卡或自定义读卡器
+
+# 配置 — 按键
+config.keys.pressHint=按下按键…
+config.io3.test.title=测试键
+config.io3.test.description=默认 1 键
+config.io3.service.title=服务键
+config.io3.service.description=默认 2 键
+config.io3.coin.title=投币键
+config.io3.coin.description=默认 3 键
 
 # 日志页
 logs.empty=暂无日志

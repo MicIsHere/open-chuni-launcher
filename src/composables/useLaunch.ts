@@ -6,19 +6,15 @@ import { useSettings } from "@/composables/useSettings";
 import { useNotifications } from "@/composables/useNotifications";
 import type { GamePlugin, PluginInfo } from "@/lib/plugins";
 import { dllFileName, getGameDlls, mergePluginInfos } from "@/lib/plugins";
-import { buildServerPatch, validateServerConfig } from "@/lib/servers";
+import { validateServerConfig } from "@/lib/servers";
+import { buildSegatoolsPatch } from "@/lib/segatools";
 
-/** 日志上限：超出后丢弃最早的记录 */
 const MAX_LOG_LINES = 500;
 
 interface LaunchReport {
   missing_dlls: string[];
 }
 
-/**
- * 会话日志与运行状态是全局单例：切换页面、重新挂载都不会丢失。
- * 日志不持久化——启动器重启、每次启动游戏时自动清空。
- */
 const logs = ref<string[]>([]);
 const running = ref(false);
 const unlisteners: Array<() => void> = [];
@@ -35,8 +31,6 @@ function isTauri(): boolean {
   return "__TAURI_INTERNALS__" in window;
 }
 
-/* 注册后端事件监听并同步初始状态。应用生命周期内只执行一次，
-   监听器随进程存续，不需要手动解除。 */
 async function init(): Promise<void> {
   if (!isTauri()) return;
   const { notify } = useNotifications();
@@ -100,7 +94,14 @@ export function useLaunch() {
         gameDir: settings.value.gamePath,
         dlls: getGameDlls(settings.value.plugins),
         builtinPlugins,
-        server: buildServerPatch(settings.value.server),
+        segatools: buildSegatoolsPatch(
+          settings.value.server,
+          settings.value.vfs,
+          settings.value.gpio,
+          settings.value.gfx,
+          settings.value.aime,
+          settings.value.io3,
+        ),
         launchTimeoutSecs: settings.value.launchTimeoutSeconds,
       });
       if (report.missing_dlls.length > 0) {

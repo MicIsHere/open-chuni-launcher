@@ -18,4 +18,14 @@
   .number-field-step {
     @apply absolute top-1/2 -translate-y-1/2 p-3 disabled:cursor-not-allowed disabled:opacity-20;
   }
+
+  /* 按键捕获按钮：聚焦后按下按键即记录虚拟键码 */
+  .key-capture {
+    @apply flex h-8 w-44 items-center gap-2 rounded-lg border border-input px-2.5 text-sm text-foreground outline-none transition-colors select-none focus-visible:ring-3 focus-visible:ring-ring/50;
+  }
+
+  /* 记录态：高亮边框提示等待输入 */
+  .key-capture[data-recording="true"] {
+    @apply border-ring text-muted-foreground;
+  }
 }

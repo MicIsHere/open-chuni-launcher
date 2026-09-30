@@ -9,16 +9,83 @@ nav.settings=Settings
 
 # Config page
 nav.config=Config
+
+# Config — sections
+config.section.server=Server
+config.section.display=Display & window
+config.section.storage=Directories & card reader
+config.section.keys=Keys
+
+# Config — server
 config.server.title=Game server
-config.server.description=Patched into bin/segatools.ini when the game launches
+config.server.description=Patched into segatools.ini when the game launches
 config.server.preset=Server preset
 config.server.custom=Custom
 config.server.dns=DNS server
+config.server.dnsRequired=A custom server requires a DNS server
 config.server.aimedb=AimeDB server (optional)
 config.server.aimedbHint=Most servers do not need an AimeDB entry
 config.keychip.title=Keychip
 config.keychip.placeholder=A60E-01A88888888
 config.keychip.invalid=Keychip is missing or malformed — cannot launch the game
+
+# Config — display mode
+config.display.title=Display mode
+config.display.description=Choose 60fps or 120fps, or customize each switch
+config.display.fps120=120fps
+config.display.fps60=60fps
+config.display.custom=Custom
+config.display.dipsw1.title=NetInstall type
+config.display.dipsw1.description=Client or server
+config.display.dipsw1.client=Client
+config.display.dipsw1.server=Server
+config.display.dipsw2.title=Monitor type
+config.display.dipsw2.description=120fps or 60fps
+config.display.dipsw2.fps120=120fps
+config.display.dipsw2.fps60=60fps
+config.display.dipsw3.title=Aime reader type
+config.display.dipsw3.description=SP or CVT
+config.display.dipsw3.sp=SP
+config.display.dipsw3.cvt=CVT
+
+# Config — window mode
+config.window.title=Window mode
+config.window.description=Choose fullscreen, borderless or windowed
+config.window.fullscreen=Fullscreen
+config.window.borderless=Borderless windowed
+config.window.windowed=Windowed
+config.window.custom=Custom
+config.window.windowed.title=Force windowed
+config.window.windowed.description=Fullscreen or windowed
+config.window.windowed.off=Fullscreen
+config.window.windowed.on=Windowed
+config.window.framed.title=Window frame
+config.window.framed.description=Add a frame when running windowed
+config.window.framed.off=No frame
+config.window.framed.on=Frame
+config.window.monitor.title=Monitor
+config.window.monitor.description=Monitor to use in fullscreen, 0 = primary screen
+
+# Config — directories and card reader
+config.vfs.option.title=Option directory
+config.vfs.option.description=Game option directory, contains Axxx directories
+config.vfs.amfs.title=AMFS directory
+config.vfs.amfs.description=Game AMFS directory, contains ICF1 and ICF2; not recommended to change
+config.vfs.appdata.title=AppData directory
+config.vfs.appdata.description=An empty directory shareable across games; not recommended to change
+config.vfs.browse=Browse...
+config.vfs.placeholder=e.g. option
+config.aime.title=Virtual card reader
+config.aime.description=Uses a virtual card or custom reader when enabled
+
+# Config — keys
+config.keys.pressHint=Press a key…
+config.io3.test.title=Test key
+config.io3.test.description=Default is the 1 key
+config.io3.service.title=Service key
+config.io3.service.description=Default is the 2 key
+config.io3.coin.title=Coin key
+config.io3.coin.description=Default is the 3 key
 
 # Logs page
 logs.empty=No logs yet

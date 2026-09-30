@@ -21,27 +21,20 @@ pub struct BuiltinPluginSource {
     pub source: String,
 }
 
-/// 服务器配置（写入 segatools.ini 的 [DNS] 与 [keychip]）
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ServerPatch {
-    pub dns_default: String,
-    pub dns_aimedb: Option<String>,
-    pub keychip: String,
-}
-
 #[tauri::command]
 pub async fn launch_game(
     app: AppHandle,
     game_dir: String,
     dlls: Vec<String>,
     builtin_plugins: Option<Vec<BuiltinPluginSource>>,
-    server: Option<ServerPatch>,
+    segatools: Option<segatools::SegatoolsPatch>,
     launch_timeout_secs: Option<u64>,
 ) -> Result<LaunchReport, String> {
-    if let Some(server) = &server {
-        if !segatools::is_valid_keychip(&server.keychip) {
-            return Err("机台编号未填写或格式不正确，无法启动游戏".to_string());
+    if let Some(patch) = &segatools {
+        if let Some(keychip) = &patch.keychip {
+            if !segatools::is_valid_keychip(&keychip.id) {
+                return Err("机台编号未填写或格式不正确，无法启动游戏".to_string());
+            }
         }
     }
     {
@@ -60,7 +53,7 @@ pub async fn launch_game(
             &game_dir,
             dlls,
             builtin_plugins,
-            server,
+            segatools,
             launch_timeout_secs.unwrap_or(15),
         )
     })
@@ -104,14 +97,13 @@ fn run_session(
     game_root: &str,
     dlls: Vec<String>,
     builtin_plugins: Option<Vec<BuiltinPluginSource>>,
-    server: Option<ServerPatch>,
+    segatools: Option<segatools::SegatoolsPatch>,
     launch_timeout_secs: u64,
 ) -> Result<LaunchReport, String> {
     let game_root = PathBuf::from(game_root);
     if !game_root.is_dir() {
         return Err(format!("游戏根目录不存在：{}", game_root.display()));
     }
-    // 注入器、游戏程序与 DLL 都在根目录的 bin 子目录内
     let bin_dir = launcher::resolve_bin_dir(&game_root);
     if !bin_dir.join(launcher::GAME_INJECTOR_X86).is_file() {
         return Err(format!(
@@ -133,14 +125,9 @@ fn run_session(
         }
     }
 
-    if let Some(server) = &server {
-        segatools::patch_server_config(
-            &bin_dir,
-            &server.dns_default,
-            server.dns_aimedb.as_deref(),
-            &server.keychip,
-        )?;
-        log(app, "已将服务器配置写入 segatools.ini");
+    if let Some(patch) = &segatools {
+        segatools::patch_ini(&bin_dir, &patch.sections())?;
+        log(app, "已将配置写入 segatools.ini");
     }
 
     log(app, "正在清理残留的 amdaemon 进程…");
