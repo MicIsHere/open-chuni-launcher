@@ -1,0 +1,36 @@
+/* 配置页：游戏服务器大卡片 */
+@layer components {
+  .config-server-card {
+    @apply flex flex-col gap-5 rounded-xl border bg-card p-6 text-card-foreground;
+  }
+
+  /* 卡片头部：图标 + 标题与说明 */
+  .config-server-header {
+    @apply flex items-center gap-3;
+  }
+
+  /* 卡片图标底座 */
+  .config-server-icon {
+    @apply flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground;
+  }
+
+  /* 配置字段：标签与控件纵向排列 */
+  .config-field {
+    @apply flex min-w-0 flex-col gap-1.5;
+  }
+
+  /* 字段标签 */
+  .config-field-label {
+    @apply text-sm font-medium;
+  }
+
+  /* 字段辅助说明 */
+  .config-field-hint {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* 卡片内分隔线 */
+  .config-divider {
+    @apply border-t border-border;
+  }
+}

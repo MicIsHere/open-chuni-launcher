@@ -1,6 +1,7 @@
 import { ref, watch } from "vue";
 import { loadPlugins } from "@/lib/plugins";
 import type { GamePlugin } from "@/lib/plugins";
+import type { ServerConfig } from "@/lib/servers";
 import { useNotifications } from "@/composables/useNotifications";
 import { useI18n } from "@/i18n";
 
@@ -9,6 +10,7 @@ export interface AppSettings {
   launchArgs: string;
   launchTimeoutSeconds: number;
   plugins: GamePlugin[];
+  server: ServerConfig;
 }
 
 const DEFAULTS: AppSettings = {
@@ -16,6 +18,7 @@ const DEFAULTS: AppSettings = {
   launchArgs: "",
   launchTimeoutSeconds: 30,
   plugins: loadPlugins(),
+  server: { preset: "custom", customDns: "", customAimeDb: "", keychip: "" },
 };
 
 const STORAGE_KEY = "settings";

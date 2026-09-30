@@ -1,13 +1,24 @@
 use std::io::{BufRead, BufReader, Read};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 
 use crate::inject::{build_command, InjectSpec};
 
 pub const AMDAEMON_EXE: &str = "amdaemon.exe";
 pub const GAME_EXE: &str = "chusanApp.exe";
+pub const GAME_INJECTOR_X86: &str = "inject_x86.exe";
+pub const BIN_DIR: &str = "bin";
 
 const OPENSSL_IA32CAP: &str = ":~0x20000000";
+
+pub fn resolve_bin_dir(game_root: &Path) -> PathBuf {
+    let bin = game_root.join(BIN_DIR);
+    if bin.is_dir() {
+        bin
+    } else {
+        game_root.to_path_buf()
+    }
+}
 
 fn amdaemon_spec() -> InjectSpec {
     InjectSpec {
@@ -31,7 +42,7 @@ fn amdaemon_spec() -> InjectSpec {
 
 fn game_spec(dlls: Vec<String>) -> InjectSpec {
     InjectSpec {
-        injector: "inject_x86.exe",
+        injector: GAME_INJECTOR_X86,
         exe: GAME_EXE.to_string(),
         dlls,
         target_args: vec![],
@@ -68,10 +79,10 @@ pub fn process_exists(image: &str) -> bool {
 }
 
 pub fn spawn_amdaemon(
-    game_dir: &Path,
+    bin_dir: &Path,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
 ) -> Result<Child, String> {
-    let mut built = build_command(game_dir, &amdaemon_spec());
+    let mut built = build_command(bin_dir, &amdaemon_spec());
     spawn_with_output(&mut built.command, "amdaemon", on_line);
     built
         .command
@@ -80,11 +91,11 @@ pub fn spawn_amdaemon(
 }
 
 pub fn spawn_game(
-    game_dir: &Path,
+    bin_dir: &Path,
     dlls: Vec<String>,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
 ) -> Result<(Child, Vec<String>), String> {
-    let mut built = build_command(game_dir, &game_spec(dlls));
+    let mut built = build_command(bin_dir, &game_spec(dlls));
     spawn_with_output(&mut built.command, "game", on_line);
     let child = built
         .command

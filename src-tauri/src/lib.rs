@@ -2,6 +2,7 @@ mod commands;
 mod inject;
 mod launcher;
 mod plugins;
+mod segatools;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

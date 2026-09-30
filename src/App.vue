@@ -5,6 +5,7 @@ import AppSidebar from "@/components/layout/AppSidebar.vue";
 import AppNotifications from "@/components/layout/AppNotifications.vue";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useI18n } from "@/i18n";
+import ConfigPage from "@/pages/ConfigPage.vue";
 import HomePage from "@/pages/HomePage.vue";
 import PluginsPage from "@/pages/PluginsPage.vue";
 import LogsPage from "@/pages/LogsPage.vue";
@@ -15,6 +16,7 @@ const { t } = useI18n();
 
 const pages: Record<string, Component> = {
   home: HomePage,
+  config: ConfigPage,
   plugins: PluginsPage,
   logs: LogsPage,
   settings: SettingsPage,

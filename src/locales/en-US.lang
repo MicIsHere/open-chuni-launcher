@@ -7,6 +7,19 @@ nav.plugins=Plugins
 nav.logs=Logs
 nav.settings=Settings
 
+# Config page
+nav.config=Config
+config.server.title=Game server
+config.server.description=Patched into bin/segatools.ini when the game launches
+config.server.preset=Server preset
+config.server.custom=Custom
+config.server.dns=DNS server
+config.server.aimedb=AimeDB server (optional)
+config.server.aimedbHint=Most servers do not need an AimeDB entry
+config.keychip.title=Keychip
+config.keychip.placeholder=A60E-01A88888888
+config.keychip.invalid=Keychip is missing or malformed — cannot launch the game
+
 # Logs page
 logs.empty=No logs yet
 
@@ -31,7 +44,7 @@ settings.language.description=Language used across the interface
 
 # Settings — game
 settings.gamePath.title=Game path
-settings.gamePath.description=Folder containing the game executable
+settings.gamePath.description=Game root directory (game executables live in its bin folder)
 settings.gamePath.browse=Browse...
 settings.gamePath.placeholder=No folder selected
 settings.launchArgs.title=Launch arguments

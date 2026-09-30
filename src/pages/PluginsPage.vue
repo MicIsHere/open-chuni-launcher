@@ -23,7 +23,6 @@ const importing = ref(false);
 const newDll = ref("");
 const newDescription = ref("");
 
-// 进入页面时刷新内置插件目录：补全来源路径与清单信息
 onMounted(async () => {
   if (!isTauri) return;
   try {
@@ -41,7 +40,6 @@ const groups = computed(() => [
 const enabledCount = computed(() => settings.value.plugins.filter((plugin) => plugin.enabled).length);
 
 function pluginName(plugin: GamePlugin): string {
-  // 名称来自清单（只读，随语言切换）；清单缺失时回落到 i18n 名称或文件名
   return (
     resolveLocalizedText(plugin.name, locale.value).trim() || defaultPluginName(plugin)
   );
@@ -51,7 +49,6 @@ function pluginDescription(plugin: GamePlugin): string {
   return resolveLocalizedText(plugin.description, locale.value);
 }
 
-// 可编辑描述：自定义插件写当前语言的条目；语言中立字符串保持原形态
 function editableDescription(plugin: GamePlugin): string {
   return resolveLocalizedText(plugin.description, locale.value);
 }
@@ -221,7 +218,6 @@ async function importDlls(fromFolder: boolean) {
           </div>
         </div>
         <div class="plugin-field">
-          <!-- 内置插件描述来自清单，不可更改且随语言切换；自定义插件可编辑 -->
           <p
             v-if="plugin.descriptionLocked"
             class="plugin-description-readonly"

@@ -6,6 +6,7 @@ import { useSettings } from "@/composables/useSettings";
 import { useNotifications } from "@/composables/useNotifications";
 import type { GamePlugin, PluginInfo } from "@/lib/plugins";
 import { dllFileName, getGameDlls, mergePluginInfos } from "@/lib/plugins";
+import { buildServerPatch, validateServerConfig } from "@/lib/servers";
 
 /** 日志上限：超出后丢弃最早的记录 */
 const MAX_LOG_LINES = 500;
@@ -81,6 +82,14 @@ export function useLaunch() {
       notify("info", t("notifications.desktopOnly"));
       return;
     }
+    // 服务器配置校验：机台编号与自定义 DNS 不合法时拒绝启动
+    const serverError = validateServerConfig(settings.value.server);
+    if (serverError) {
+      const message = t(serverError);
+      appendLog(message);
+      notify("warning", message);
+      return;
+    }
     running.value = true;
     try {
       // 内置插件 DLL 位于资源目录，启动时由后端复制到游戏目录
@@ -91,6 +100,7 @@ export function useLaunch() {
         gameDir: settings.value.gamePath,
         dlls: getGameDlls(settings.value.plugins),
         builtinPlugins,
+        server: buildServerPatch(settings.value.server),
         launchTimeoutSecs: settings.value.launchTimeoutSeconds,
       });
       if (report.missing_dlls.length > 0) {
