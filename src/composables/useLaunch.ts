@@ -9,37 +9,24 @@ import { dllFileName, getGameDlls, mergePluginInfos } from "@/lib/plugins";
 
 /** 日志上限：超出后丢弃最早的记录 */
 const MAX_LOG_LINES = 500;
-const LOGS_KEY = "launch-logs";
 
 interface LaunchReport {
   missing_dlls: string[];
 }
 
-/** 会话日志与运行状态是全局单例：切换页面、重新挂载都不会丢失 */
-const logs = ref<string[]>(loadLogs());
+/**
+ * 会话日志与运行状态是全局单例：切换页面、重新挂载都不会丢失。
+ * 日志不持久化——启动器重启、每次启动游戏时自动清空。
+ */
+const logs = ref<string[]>([]);
 const running = ref(false);
 const unlisteners: Array<() => void> = [];
 let initPromise: Promise<void> | undefined;
-
-function loadLogs(): string[] {
-  try {
-    const stored = JSON.parse(localStorage.getItem(LOGS_KEY) ?? "[]");
-    return Array.isArray(stored) ? stored.slice(-MAX_LOG_LINES) : [];
-  } catch (error) {
-    useNotifications().notifyError(error, useI18n().t("notifications.logsLoadError"));
-    return [];
-  }
-}
 
 function appendLog(message: string) {
   logs.value.push(message);
   if (logs.value.length > MAX_LOG_LINES) {
     logs.value.splice(0, logs.value.length - MAX_LOG_LINES);
-  }
-  try {
-    localStorage.setItem(LOGS_KEY, JSON.stringify(logs.value));
-  } catch (error) {
-    useNotifications().notifyError(error, useI18n().t("notifications.logsSaveError"));
   }
 }
 
@@ -82,6 +69,8 @@ export function useLaunch() {
   });
 
   async function launch() {
+    // 每次启动游戏前清空上一局的日志
+    logs.value = [];
     if (!settings.value.gamePath) {
       const message = t("home.needGamePath");
       appendLog(message);
@@ -102,6 +91,7 @@ export function useLaunch() {
         gameDir: settings.value.gamePath,
         dlls: getGameDlls(settings.value.plugins),
         builtinPlugins,
+        launchTimeoutSecs: settings.value.launchTimeoutSeconds,
       });
       if (report.missing_dlls.length > 0) {
         notify("warning", t("notifications.missingDlls", { dlls: report.missing_dlls.join(", ") }));

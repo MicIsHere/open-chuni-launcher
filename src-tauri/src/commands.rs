@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
 
 use serde::{Deserialize, Serialize};
@@ -29,6 +29,7 @@ pub async fn launch_game(
     game_dir: String,
     dlls: Vec<String>,
     builtin_plugins: Option<Vec<BuiltinPluginSource>>,
+    launch_timeout_secs: Option<u64>,
 ) -> Result<LaunchReport, String> {
     {
         let state = app.state::<LauncherState>();
@@ -41,7 +42,13 @@ pub async fn launch_game(
 
     let session_app = app.clone();
     let result = tauri::async_runtime::spawn_blocking(move || {
-        run_session(&session_app, &game_dir, dlls, builtin_plugins)
+        run_session(
+            &session_app,
+            &game_dir,
+            dlls,
+            builtin_plugins,
+            launch_timeout_secs.unwrap_or(15),
+        )
     })
     .await
     .map_err(|error| format!("内部任务异常：{error}"))?;
@@ -64,7 +71,7 @@ pub fn stop_game() -> Result<(), String> {
     Ok(())
 }
 
-/// 列出插件目录中的 DLL 插件（含同名 JSON 清单信息）。
+/// 列出插件目录中的插件（每个子文件夹一个，含多语言清单信息）。
 /// `directory` 缺省时扫描随启动器打包的内置插件目录。
 #[tauri::command]
 pub async fn list_plugin_dlls(
@@ -75,35 +82,9 @@ pub async fn list_plugin_dlls(
         Some(directory) => PathBuf::from(directory),
         None => plugins::plugins_dir(&app).ok_or_else(|| "未找到内置插件目录".to_string())?,
     };
-    tauri::async_runtime::spawn_blocking(move || {
-        let paths = scan_plugin_dlls(&directory)?;
-        Ok(paths
-            .iter()
-            .filter_map(|path| plugins::read_plugin_info(&directory, Path::new(path)))
-            .collect())
-    })
-    .await
-    .map_err(|error| format!("内部任务异常：{error}"))?
-}
-
-fn scan_plugin_dlls(directory: &Path) -> Result<Vec<String>, String> {
-    let entries =
-        std::fs::read_dir(directory).map_err(|error| format!("无法读取插件文件夹：{error}"))?;
-    let mut dlls = Vec::new();
-    for entry in entries {
-        let path = entry
-            .map_err(|error| format!("无法读取插件文件：{error}"))?
-            .path();
-        if path.is_file()
-            && path
-                .extension()
-                .is_some_and(|extension| extension.eq_ignore_ascii_case("dll"))
-        {
-            dlls.push(path.to_string_lossy().into_owned());
-        }
-    }
-    dlls.sort_by_cached_key(|path| path.to_lowercase());
-    Ok(dlls)
+    tauri::async_runtime::spawn_blocking(move || Ok(plugins::scan_plugins(&directory)))
+        .await
+        .map_err(|error| format!("内部任务异常：{error}"))?
 }
 
 fn run_session(
@@ -111,6 +92,7 @@ fn run_session(
     game_dir: &str,
     dlls: Vec<String>,
     builtin_plugins: Option<Vec<BuiltinPluginSource>>,
+    launch_timeout_secs: u64,
 ) -> Result<LaunchReport, String> {
     let game_dir = PathBuf::from(game_dir);
     if !game_dir.is_dir() {
@@ -141,13 +123,34 @@ fn run_session(
 
     log(app, "正在启动游戏…");
     let app_game = app.clone();
-    let (mut game, missing_dlls) = launcher::spawn_game(&game_dir, dlls, move |line| {
+    let (_injector, missing_dlls) = launcher::spawn_game(&game_dir, dlls, move |line| {
         let _ = app_game.emit("launch://log", line.to_string());
     })?;
 
-    log(app, "游戏已启动，等待退出…");
+    // 注入器注入完成后即自行退出，不代表游戏结束；
+    // 会话生命周期以游戏本体进程（chusanApp.exe）是否存在为准。
     let _ = app.emit("launch://state", true);
-    let _ = game.wait();
+
+    log(app, "等待游戏进程出现…");
+    let deadline = std::time::Instant::now()
+        + std::time::Duration::from_secs(launch_timeout_secs.max(1));
+    loop {
+        if launcher::process_exists(launcher::GAME_EXE) {
+            break;
+        }
+        if std::time::Instant::now() >= deadline {
+            launcher::kill_by_image(launcher::GAME_EXE);
+            launcher::kill_by_image(launcher::AMDAEMON_EXE);
+            let _ = app.emit("launch://state", false);
+            return Err("等待游戏进程出现超时，请检查游戏目录与注入配置".to_string());
+        }
+        std::thread::sleep(std::time::Duration::from_millis(500));
+    }
+
+    log(app, "游戏运行中，等待退出…");
+    while launcher::process_exists(launcher::GAME_EXE) {
+        std::thread::sleep(std::time::Duration::from_millis(1000));
+    }
 
     log(app, "正在清理 amdaemon…");
     launcher::kill_by_image(launcher::AMDAEMON_EXE);
@@ -171,31 +174,3 @@ fn log(app: &AppHandle, message: &str) {
     let _ = app.emit("launch://log", message.to_string());
 }
 
-#[cfg(test)]
-mod tests {
-    use super::scan_plugin_dlls;
-
-    #[test]
-    fn scan_imports_only_dll_files_in_stable_order() {
-        let unique = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
-            .as_nanos();
-        let directory = std::env::temp_dir().join(format!("launcher-plugins-{unique}"));
-        std::fs::create_dir(&directory).unwrap();
-        for name in ["z_plugin.dll", "a plugin.DLL", "notes.txt"] {
-            std::fs::write(directory.join(name), b"").unwrap();
-        }
-        std::fs::create_dir(directory.join("nested.dll")).unwrap();
-        std::fs::write(directory.join("nested.dll/ignored.dll"), b"").unwrap();
-
-        let result = scan_plugin_dlls(&directory);
-        std::fs::remove_dir_all(&directory).unwrap();
-        assert_eq!(
-            result.unwrap(),
-            ["a plugin.DLL", "z_plugin.dll"]
-                .map(|name| directory.join(name).to_string_lossy().into_owned())
-        );
-        assert!(scan_plugin_dlls(&directory).is_err());
-    }
-}

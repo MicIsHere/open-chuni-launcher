@@ -93,5 +93,3 @@ notifications.desktopOnly=Launch the game from the desktop application
 notifications.settingsReset=Invalid settings; using defaults
 notifications.settingsLoadError=Failed to load settings; using defaults
 notifications.settingsSaveError=Failed to save settings
-notifications.logsLoadError=Failed to load logs
-notifications.logsSaveError=Failed to save logs

@@ -93,5 +93,3 @@ notifications.desktopOnly=请在桌面应用中启动游戏
 notifications.settingsReset=设置格式无效，已使用默认配置
 notifications.settingsLoadError=设置读取失败，已使用默认配置
 notifications.settingsSaveError=设置保存失败
-notifications.logsLoadError=日志读取失败
-notifications.logsSaveError=日志保存失败

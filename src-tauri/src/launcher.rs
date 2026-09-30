@@ -55,6 +55,19 @@ pub fn kill_by_image(image: &str) {
     let _ = command.output();
 }
 
+/// 检查指定映像名的进程是否存在（注入器不等待游戏进程，须轮询游戏本体）
+pub fn process_exists(image: &str) -> bool {
+    let mut command = Command::new("tasklist");
+    command.args(["/FI", &format!("IMAGENAME eq {image}"), "/NH"]);
+    stylize(&mut command);
+    let Ok(output) = command.output() else {
+        return false;
+    };
+    String::from_utf8_lossy(&output.stdout)
+        .to_lowercase()
+        .contains(&image.to_lowercase())
+}
+
 /// 启动 amdaemon（不等待其退出）；其输出经 `on_line` 逐行回调
 pub fn spawn_amdaemon(
     game_dir: &Path,
