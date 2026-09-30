@@ -96,6 +96,7 @@ sidebar.collapse=Collapse
 sidebar.expand=Expand sidebar
 
 # Themes
+theme.system=System
 theme.light=Light
 theme.dark=Dark
 

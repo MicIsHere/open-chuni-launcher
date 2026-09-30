@@ -1,6 +1,6 @@
 use std::io::{BufRead, BufReader, Read};
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command, Stdio};
+use std::process::{Command, Stdio};
 
 use crate::inject::{build_command, InjectSpec};
 
@@ -81,12 +81,9 @@ pub fn process_exists(image: &str) -> bool {
 pub fn spawn_amdaemon(
     bin_dir: &Path,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
-) -> Result<Child, String> {
+) -> Result<(), String> {
     let mut built = build_command(bin_dir, &amdaemon_spec());
-    spawn_with_output(&mut built.command, "amdaemon", on_line);
-    built
-        .command
-        .spawn()
+    spawn_logged(&mut built.command, "amdaemon", on_line)
         .map_err(|error| format!("启动 amdaemon 失败：{error}"))
 }
 
@@ -94,27 +91,22 @@ pub fn spawn_game(
     bin_dir: &Path,
     dlls: Vec<String>,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
-) -> Result<(Child, Vec<String>), String> {
+) -> Result<Vec<String>, String> {
     let mut built = build_command(bin_dir, &game_spec(dlls));
-    spawn_with_output(&mut built.command, "game", on_line);
-    let child = built
-        .command
-        .spawn()
+    spawn_logged(&mut built.command, "game", on_line)
         .map_err(|error| format!("启动游戏失败：{error}"))?;
-    Ok((child, built.missing_dlls))
+    Ok(built.missing_dlls)
 }
 
-fn spawn_with_output(
+/// 只 spawn 一次进程并把 stdout/stderr 转发为日志；
+/// 进程随启动器挂在作业对象上，启动器退出时由系统连带结束
+fn spawn_logged(
     command: &mut Command,
     source: &'static str,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
-) {
+) -> std::io::Result<()> {
     command.stdout(Stdio::piped()).stderr(Stdio::piped());
-
-    let mut child = match command.spawn() {
-        Ok(child) => child,
-        Err(_) => return,
-    };
+    let mut child = command.spawn()?;
 
     let stdout = child.stdout.take().map(BufReader::new);
     let stderr = child.stderr.take().map(BufReader::new);
@@ -125,6 +117,7 @@ fn spawn_with_output(
     if let Some(stream) = stderr {
         std::thread::spawn(move || forward_lines(stream, source, &on_line));
     }
+    Ok(())
 }
 
 fn forward_lines<R: Read>(stream: R, source: &str, on_line: &impl Fn(&str)) {

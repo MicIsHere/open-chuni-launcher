@@ -96,6 +96,7 @@ sidebar.collapse=收起
 sidebar.expand=展开侧边栏
 
 # 主题
+theme.system=跟随系统
 theme.light=亮色
 theme.dark=暗色
 

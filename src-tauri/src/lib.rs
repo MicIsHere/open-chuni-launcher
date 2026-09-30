@@ -1,4 +1,6 @@
 mod commands;
+#[cfg(windows)]
+mod cleanup;
 mod inject;
 mod launcher;
 mod plugins;
@@ -8,6 +10,8 @@ mod segatools;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     process_guard::setup();
+    #[cfg(windows)]
+    cleanup::remove_stale();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())

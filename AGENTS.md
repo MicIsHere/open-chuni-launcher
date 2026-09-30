@@ -43,7 +43,9 @@ src-tauri/
   src/
     lib.rs      Builder、插件注册、命令注册
     commands.rs 前端命令（launch_game 阻塞至游戏退出、stop_game、list_plugin_dlls）+ 运行状态
-    launcher.rs 启动流程编排（清理 → amdaemon → 游戏 → 清理，对应原 bat 时序）
+    launcher.rs 启动流程编排（清理 → amdaemon → 游戏 → 清理，对应原 bat 时序；每条命令只 spawn 一次）
+    cleanup.rs  启动时清理遗留的启动器实例与 WebView2 残留进程（按 bundle identifier 匹配命令行，防数据目录被锁）
+    process_guard.rs Windows 作业对象（KILL_ON_JOB_CLOSE）：启动器以任何方式退出都连带结束全部子进程
     inject.rs   注入解耦：把「注入器 + 目标 + DLL 清单」组装成命令行（支持绝对路径）
     plugins.rs  内置插件：扫描打包的插件目录、解析同名 JSON 清单、图标转 data URL
   plugins/      内置插件目录（每插件一个文件夹：DLL + 英文默认清单 + `<name>.<locale>.json` 语言覆盖 + 图标，经 bundle.resources 打包）
@@ -92,7 +94,7 @@ src-tauri/
 
 ## Theming
 
-`src/lib/themes.ts` is the single registry. A theme = `{ id, icon, dark }`; `dark: true` toggles the `.dark` class, and a custom palette (optional) is a `[data-theme="<id>"]` block in `tokens.css`. Adding a theme also means adding `theme.<id>` keys to every locale file. `useTheme()` applies the theme to `<html>` before mount, persists the choice, and follows the OS preference until the user overrides it.
+`src/lib/themes.ts` is the single registry. A theme = `{ id, icon, dark, followsSystem? }`; `dark: true` toggles the `.dark` class, and a custom palette (optional) is a `[data-theme="<id>"]` block in `tokens.css`. Adding a theme also means adding `theme.<id>` keys to every locale file. `useTheme()` applies the theme to `<html>` before mount and persists the choice; the `system` entry (also the default when nothing is stored) resolves `dark` from the OS `prefers-color-scheme` and keeps following it live.
 
 ## Internationalization
 
@@ -107,6 +109,7 @@ Persisted via `useSettings()` (one JSON document in localStorage, merged over de
 - Every plugin needs three touchpoints: npm package, `src-tauri/Cargo.toml`, `.plugin(...)` in `lib.rs`, plus a permission in `src-tauri/capabilities/default.json` (see `tauri-plugin-dialog` for the path picker).
 - Browser-only previews (vite preview) have no Tauri runtime — guard native APIs (e.g. `SettingPath` disables browsing when `"__TAURI_INTERNALS__" not in window`).
 - Long-running commands (like `launch_game`, which blocks until the game exits) must be `async` + `spawn_blocking` — a sync command runs on the main thread and freezes the window. Progress goes through `launch://log` events, session state through `launch://state` + the `is_running` command; the frontend keeps both in the `useLaunch()` store (logs persisted to localStorage, capped at 500 lines).
+- 进程生命周期：`process_guard` 启动时把自身挂进 `KILL_ON_JOB_CLOSE` 作业对象，无论正常关闭、崩溃还是被强杀，WebView2、注入器、amdaemon、游戏都会随启动器一起被系统结束；`cleanup` 在创建 WebView 前结束上次遗留的启动器实例与本应用的 WebView2 残留进程（避免 WebView2 用户数据目录被锁导致的 HRESULT 0x800700AA 启动失败），因此重复启动时「新实例替换旧实例」。
 - 内置插件：每个插件是 `plugins/` 下的独立文件夹——`<name>.dll` + `<name>.json`（英文默认清单：name/description/icon/version/author）+ `<name>.<locale>.json`（语言覆盖）+ 同名图片（图标回退）。名称与描述由清单提供、均为只读，前端经 `resolveLocalizedText()` 随当前语言解析（精确 → 语言前缀 → 英文默认）；启用的内置插件在启动时由后端从资源目录复制到游戏 bin 目录再注入，DLL 清单支持绝对路径。
 - 游戏路径设置指向游戏**根目录**（如 `D:\...\HDD`），后端经 `launcher::resolve_bin_dir()` 进入其 bin 子目录运行注入器与游戏（用户直接选到 bin 时也兼容）；内置插件 DLL 同样复制到 bin。
 - Icons are generated from `public/favicon.svg` via `npx tauri icon public/favicon.svg`; `src-tauri/gen/` is generated output.

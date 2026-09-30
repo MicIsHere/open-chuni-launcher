@@ -1,10 +1,12 @@
-/* 侧边栏根容器：展开 240px；data-collapsed 时收缩为 56px 图标栏 */
+/* 侧边栏根容器：展开 240px；data-collapsed 时收缩为图标栏 */
 @layer components {
   .app-sidebar {
     @apply flex h-dvh w-60 shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-in-out;
   }
+  /* 57 = 32px 方形按钮 + 左右各 12px 内边距 + 1px 右边框，
+     使按钮成为正方形且与品牌图标（size-8 + px-3）同轴居中 */
   .app-sidebar[data-collapsed] {
-    @apply w-14;
+    @apply w-[57px];
   }
 
   /* 品牌图标底座 */
@@ -12,12 +14,12 @@
     @apply flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground;
   }
 
-  /* 文字标签：折叠时淡出并禁用交互 */
+  /* 文字标签：折叠时宽度收为 0 并淡出，避免占位把图标挤出中心 */
   .sidebar-label {
-    @apply truncate whitespace-nowrap transition-opacity duration-200;
+    @apply max-w-[200px] truncate whitespace-nowrap transition-[max-width,opacity] duration-200;
   }
   .app-sidebar[data-collapsed] .sidebar-label {
-    @apply pointer-events-none opacity-0;
+    @apply pointer-events-none max-w-0 opacity-0;
   }
 
   /* 导航区：占满剩余高度 */
@@ -28,6 +30,12 @@
   /* 底部工具区：顶部描边 */
   .sidebar-footer {
     @apply flex shrink-0 flex-col gap-1 border-t border-sidebar-border px-2 py-2;
+  }
+
+  /* 折叠时加宽导航/底部区左右内边距（12px），使 w-8 按钮成为居中的正方形 */
+  .app-sidebar[data-collapsed] .sidebar-nav,
+  .app-sidebar[data-collapsed] .sidebar-footer {
+    @apply px-3;
   }
 
   /* 注意：导航按钮样式 sidebarItemClass 定义在 AppSidebar.vue 中——它必须经过

@@ -74,6 +74,7 @@ pub fn is_running(state: State<'_, LauncherState>) -> bool {
 #[tauri::command]
 pub fn stop_game() -> Result<(), String> {
     launcher::kill_by_image(launcher::GAME_EXE);
+    launcher::kill_by_image(launcher::GAME_INJECTOR_X86);
     launcher::kill_by_image(launcher::AMDAEMON_EXE);
     Ok(())
 }
@@ -130,7 +131,9 @@ fn run_session(
         log(app, "已将配置写入 segatools.ini");
     }
 
-    log(app, "正在清理残留的 amdaemon 进程…");
+    log(app, "正在清理残留的游戏进程…");
+    launcher::kill_by_image(launcher::GAME_EXE);
+    launcher::kill_by_image(launcher::GAME_INJECTOR_X86);
     launcher::kill_by_image(launcher::AMDAEMON_EXE);
 
     log(app, "正在启动 amdaemon…");
@@ -141,9 +144,16 @@ fn run_session(
 
     log(app, "正在启动游戏…");
     let app_game = app.clone();
-    let (_injector, missing_dlls) = launcher::spawn_game(&bin_dir, dlls, move |line| {
+    let missing_dlls = match launcher::spawn_game(&bin_dir, dlls, move |line| {
         let _ = app_game.emit("launch://log", line.to_string());
-    })?;
+    }) {
+        Ok(missing_dlls) => missing_dlls,
+        Err(error) => {
+            // 注入器没能启动时，amdaemon 不能被留在后台
+            launcher::kill_by_image(launcher::AMDAEMON_EXE);
+            return Err(error);
+        }
+    };
 
     let _ = app.emit("launch://state", true);
 
@@ -156,6 +166,7 @@ fn run_session(
         }
         if std::time::Instant::now() >= deadline {
             launcher::kill_by_image(launcher::GAME_EXE);
+            launcher::kill_by_image(launcher::GAME_INJECTOR_X86);
             launcher::kill_by_image(launcher::AMDAEMON_EXE);
             let _ = app.emit("launch://state", false);
             return Err("等待游戏进程出现超时，请检查游戏目录与注入配置".to_string());

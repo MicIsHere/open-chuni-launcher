@@ -15,9 +15,6 @@ const { t } = useI18n();
 
 const active = defineModel<string>({ required: true });
 
-const sidebarItemClass =
-  "w-full justify-start gap-2.5 px-2 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground";
-
 const COLLAPSE_KEY = "sidebar-collapsed";
 const NARROW_QUERY = "(max-width: 639.98px)";
 
@@ -26,6 +23,14 @@ const mediaQuery = window.matchMedia(NARROW_QUERY);
 const narrow = ref(mediaQuery.matches);
 
 const collapsed = computed(() => manualCollapsed.value || narrow.value);
+
+// 导航按钮样式：折叠时收为居中的正方形图标按钮，展开时左对齐并留出文字空间。
+// 必须经 cn()/tw-merge 覆盖按钮变体自带的工具类，所以放在模板侧而非 CSS 层。
+const sidebarItemClass = computed(() =>
+  collapsed.value
+    ? "w-8 justify-center gap-0 px-0 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+    : "w-full justify-start gap-2.5 px-2 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+);
 
 function toggleCollapsed() {
   manualCollapsed.value = !manualCollapsed.value;
