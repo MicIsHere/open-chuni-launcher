@@ -55,7 +55,6 @@ pub fn kill_by_image(image: &str) {
     let _ = command.output();
 }
 
-/// 检查指定映像名的进程是否存在（注入器不等待游戏进程，须轮询游戏本体）
 pub fn process_exists(image: &str) -> bool {
     let mut command = Command::new("tasklist");
     command.args(["/FI", &format!("IMAGENAME eq {image}"), "/NH"]);
@@ -68,7 +67,6 @@ pub fn process_exists(image: &str) -> bool {
         .contains(&image.to_lowercase())
 }
 
-/// 启动 amdaemon（不等待其退出）；其输出经 `on_line` 逐行回调
 pub fn spawn_amdaemon(
     game_dir: &Path,
     on_line: impl Fn(&str) + Send + Sync + Clone + 'static,
@@ -81,7 +79,6 @@ pub fn spawn_amdaemon(
         .map_err(|error| format!("启动 amdaemon 失败：{error}"))
 }
 
-/// 启动游戏（注入器进程会阻塞到游戏退出）；其输出经 `on_line` 逐行回调
 pub fn spawn_game(
     game_dir: &Path,
     dlls: Vec<String>,
@@ -96,7 +93,6 @@ pub fn spawn_game(
     Ok((child, built.missing_dlls))
 }
 
-/// 管道化子进程 stdout/stderr，并各起一个转发线程
 fn spawn_with_output(
     command: &mut Command,
     source: &'static str,
@@ -121,7 +117,6 @@ fn spawn_with_output(
     }
 }
 
-/// 逐行读取流并回调；按字节切行后做有损 UTF-8 转换，兼容非 UTF-8 输出
 fn forward_lines<R: Read>(stream: R, source: &str, on_line: &impl Fn(&str)) {
     let mut reader = BufReader::new(stream);
     let mut buffer = Vec::new();

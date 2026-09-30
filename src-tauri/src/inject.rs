@@ -13,8 +13,6 @@ pub struct BuiltInjection {
     pub missing_dlls: Vec<String>,
 }
 
-/// 解析 DLL 条目：绝对路径直接使用（内置插件位于资源目录），
-/// 相对路径基于游戏目录。
 fn resolve_dll(game_dir: &Path, dll: &str) -> PathBuf {
     let path = Path::new(dll);
     if path.is_absolute() {

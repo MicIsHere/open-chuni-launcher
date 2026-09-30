@@ -1,16 +1,3 @@
-//! 内置插件：扫描随启动器打包的插件目录（每个插件一个独立文件夹），
-//! 读取默认 JSON 清单（英文）与各语言覆盖清单，供前端展示与注入。
-//!
-//! 目录结构：
-//! ```text
-//! plugins/
-//!   <plugin-folder>/
-//!     <name>.dll              ← 插件本体
-//!     <name>.json             ← 默认清单（英文）：name/description/icon/version/author
-//!     <name>.<locale>.json    ← 语言覆盖（如 duolinguo.zh-CN.json）
-//!     <name>.png|jpg|svg      ← 图标（或由清单 icon 字段指定）
-//! ```
-
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::{fs};
@@ -20,7 +7,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::{AppHandle, Manager};
 
-/// 插件默认清单（英文，全部字段可选）
 #[derive(Deserialize, Default)]
 #[serde(default)]
 struct PluginManifest {
@@ -31,7 +17,6 @@ struct PluginManifest {
     author: Option<String>,
 }
 
-/// 语言覆盖清单（该语言的 name/description）
 #[derive(Deserialize, Default)]
 #[serde(default)]
 struct PluginLocaleOverrides {
@@ -39,33 +24,23 @@ struct PluginLocaleOverrides {
     description: Option<String>,
 }
 
-/// 返回给前端的插件信息
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginInfo {
-    /// DLL 文件名（作为插件在设置中的唯一标识）
     pub file: String,
-    /// 清单中的默认名称；无清单时取 DLL 文件名。
-    /// 字符串（语言中立）或 {"en-US": …, "zh-CN": …} 多语言映射
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<Value>,
-    /// 清单中的描述（只读，用户不可更改），形态同 name
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<Value>,
-    /// 版本号（来自默认清单）
     #[serde(skip_serializing_if = "Option::is_none")]
     pub version: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub author: Option<String>,
-    /// DLL 绝对路径（注入时直接使用）
     pub path: String,
-    /// 图标的 data URL；无图标时为 null，前端显示默认图标
     pub icon_data_url: Option<String>,
-    /// 是否存在默认清单：有则名称与描述来自清单、不可更改
     pub has_manifest: bool,
 }
 
-/// 解析插件根目录：打包后取资源目录下的 plugins，开发时回退到源码目录
 pub fn plugins_dir(app: &AppHandle) -> Option<PathBuf> {
     if let Ok(resource_dir) = app.path().resource_dir() {
         let dir = resource_dir.join("plugins");
@@ -77,7 +52,6 @@ pub fn plugins_dir(app: &AppHandle) -> Option<PathBuf> {
     dev_dir.is_dir().then_some(dev_dir)
 }
 
-/// 扫描插件根目录：每个直接子文件夹是一个插件，按 DLL 文件名排序
 pub fn scan_plugins(dir: &Path) -> Vec<PluginInfo> {
     let Ok(entries) = fs::read_dir(dir) else {
         return Vec::new();
@@ -93,7 +67,6 @@ pub fn scan_plugins(dir: &Path) -> Vec<PluginInfo> {
     plugins
 }
 
-/// 读取单个插件文件夹
 fn read_plugin_folder(folder: &Path) -> Option<PluginInfo> {
     let dll_path = find_dll(folder)?;
     let dll_file = dll_path.file_name()?.to_string_lossy().to_string();
@@ -127,7 +100,6 @@ fn read_plugin_folder(folder: &Path) -> Option<PluginInfo> {
     })
 }
 
-/// 定位插件文件夹中的 DLL：优先与文件夹同名的 DLL，否则取第一个（按文件名排序）
 fn find_dll(folder: &Path) -> Option<PathBuf> {
     let mut dlls: Vec<PathBuf> = fs::read_dir(folder)
         .ok()?
@@ -153,7 +125,6 @@ fn find_dll(folder: &Path) -> Option<PathBuf> {
     }
 }
 
-/// 读取语言覆盖清单：`<stem>.<locale>.json` → (locale → 覆盖字段)
 fn read_locale_overrides(
     folder: &Path,
     stem: &str,
@@ -196,9 +167,6 @@ fn read_locale_overrides(
     (names, descriptions)
 }
 
-/// 合并基础文案与语言覆盖为多语言值：
-/// 无覆盖 → 字符串；有覆盖 → {"en-US": 基础英文, ...覆盖}；两者皆无 → None
-/// （fallback 用于名称回落到 DLL 文件名，描述无清单时保持 None）
 fn build_localized_value(
     base: Option<String>,
     overrides: &BTreeMap<String, String>,
@@ -219,7 +187,6 @@ fn build_localized_value(
     Some(Value::Object(map))
 }
 
-/// 图标回退：与 DLL 同名的 png/jpg/jpeg/svg
 fn find_default_icon(folder: &Path, stem: &str) -> Option<PathBuf> {
     ["png", "jpg", "jpeg", "svg"]
         .iter()
@@ -227,7 +194,6 @@ fn find_default_icon(folder: &Path, stem: &str) -> Option<PathBuf> {
         .find(|path| path.is_file())
 }
 
-/// 读取图标文件并编码为 data URL
 fn icon_to_data_url(path: &Path) -> Option<String> {
     let bytes = fs::read(path).ok()?;
     let mime = match path.extension()?.to_string_lossy().to_lowercase().as_str() {
@@ -262,7 +228,6 @@ mod tests {
     fn scans_plugin_folders_and_merges_locale_overrides() {
         let dir = temp_dir("scan");
 
-        // 插件 A：DLL + 英文默认清单 + 中文覆盖 + svg 图标
         let folder_a = dir.join("plugin-a");
         fs::create_dir(&folder_a).unwrap();
         fs::write(folder_a.join("plugin-a.dll"), b"").unwrap();
@@ -283,12 +248,10 @@ mod tests {
         .unwrap();
         fs::write(folder_a.join("plugin-a.svg"), "<svg/>").unwrap();
 
-        // 插件 B：仅 DLL（无清单）
         let folder_b = dir.join("plugin-b");
         fs::create_dir(&folder_b).unwrap();
         fs::write(folder_b.join("plugin-b.dll"), b"").unwrap();
 
-        // 干扰项：散落文件与无 DLL 的文件夹被忽略；含 DLL 的子文件夹是合法插件
         fs::write(dir.join("notes.txt"), b"").unwrap();
         fs::create_dir(dir.join("empty-folder")).unwrap();
         let nested = dir.join("nested");
@@ -330,7 +293,6 @@ mod tests {
         assert!(!b.has_manifest);
         assert_eq!(b.icon_data_url, None);
 
-        // 不存在的目录 → 空列表
         assert!(scan_plugins(&dir.join("missing")).is_empty());
         fs::remove_dir_all(&dir).unwrap();
     }

@@ -14,12 +14,9 @@ pub struct LaunchReport {
     pub missing_dlls: Vec<String>,
 }
 
-/// 随启动器打包的内置插件：启动时由启动器复制到游戏目录
 #[derive(Deserialize)]
 pub struct BuiltinPluginSource {
-    /// 注入时使用的 DLL 文件名
     pub dll: String,
-    /// 资源目录中的 DLL 绝对路径
     pub source: String,
 }
 
@@ -71,8 +68,6 @@ pub fn stop_game() -> Result<(), String> {
     Ok(())
 }
 
-/// 列出插件目录中的插件（每个子文件夹一个，含多语言清单信息）。
-/// `directory` 缺省时扫描随启动器打包的内置插件目录。
 #[tauri::command]
 pub async fn list_plugin_dlls(
     app: AppHandle,
@@ -99,7 +94,6 @@ fn run_session(
         return Err(format!("游戏目录不存在：{}", game_dir.display()));
     }
 
-    // 启用的内置插件：从资源目录复制到游戏目录（对应 bat 的 if exist duolinguo.dll 前置条件）
     if let Some(builtin_plugins) = builtin_plugins {
         for plugin in builtin_plugins {
             let target = game_dir.join(&plugin.dll);
@@ -127,8 +121,6 @@ fn run_session(
         let _ = app_game.emit("launch://log", line.to_string());
     })?;
 
-    // 注入器注入完成后即自行退出，不代表游戏结束；
-    // 会话生命周期以游戏本体进程（chusanApp.exe）是否存在为准。
     let _ = app.emit("launch://state", true);
 
     log(app, "等待游戏进程出现…");
